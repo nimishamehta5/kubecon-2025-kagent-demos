@@ -27,6 +27,7 @@ kubectl apply -f broken-policy.yaml
 CLI: 
 ```bash
 kubectl apply -f cilium-policy-agent.yaml
+kubectl apply -f kagent-cilium-rbac.yaml
 ```
 
 UI:
