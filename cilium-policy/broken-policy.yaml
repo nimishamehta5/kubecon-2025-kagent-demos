@@ -1,0 +1,17 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: broken-backend-policy
+  namespace: default
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backend
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        role: frontend   # Wrong label key
+    toPorts:
+    - ports:
+      - port: "5201"
+        protocol: TCP
