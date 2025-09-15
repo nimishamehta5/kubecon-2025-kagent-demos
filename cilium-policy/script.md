@@ -6,18 +6,13 @@ kagent
 dashboard
 ```
 
-2. Apply the application yaml.
-```bash
-kubectl apply -f application.yaml
-```
-
-3. New terminal tab 2: Start hubble UI.
+2. New terminal tab 2: Start hubble UI. Observe normal hubble flows between frontend and backend pods.
 ```bash
 cilium hubble port-forward&
 cilium hubble ui
 ```
 
-4. Observe normal hubble flows, then apply policy. Observe hubble flows afterwards (dropped flows).
+3. Apply policy. Observe hubble flows afterwards (dropped flows).
 ```bash
 kubectl apply -f broken-policy.yaml
 ```

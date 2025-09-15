@@ -23,7 +23,7 @@ else
 fi
 
 # --- Enable Hubble ---
-if ! cilium status | grep -q "Hubble:.*Enabled"; then
+if ! cilium status | grep -q "Hubble Relay:.*OK"; then
     echo "Enabling Cilium Hubble..."
     cilium hubble enable --ui
     echo "Waiting for Hubble to be ready..."
@@ -33,17 +33,67 @@ else
 fi
 
 # --- Port-forward for Hubble ---
-if ! pgrep -f "cilium hubble port-forward" > /dev/null; then
-    echo "Port-forwarding for Hubble..."
-    cilium hubble port-forward &
-    echo "Waiting for port-forwarding to be set up..."
-    sleep 5
-else
-    echo "Hubble port-forwarding is already running, skipping."
+echo "Ensuring Hubble port-forward is running..."
+# Kill any existing port-forward processes 
+if pgrep -f "cilium hubble port-forward" > /dev/null; then
+    echo "Killing existing Hubble port-forward process..."
+    pkill -f "cilium hubble port-forward" || true
+    sleep 2 
 fi
+
+echo "Starting new Hubble port-forward..."
+cilium hubble port-forward &>/dev/null &
+
+echo "Waiting for Hubble port-forward to be ready..."
+for i in {1..15}; do
+    if nc -z localhost 4245; then
+        echo "Hubble port-forward is ready."
+        break
+    fi
+    if [ $i -eq 15 ]; then
+        echo "Error: Hubble port-forward failed to start after 15 seconds."
+        exit 1
+    fi
+    sleep 1
+done
 
 echo "Checking Hubble status..."
 hubble status
+
+echo "Setting up ArgoCD..."
+
+if ! kubectl get namespace argocd &> /dev/null; then
+    echo "Creating argocd namespace..."
+    kubectl create namespace argocd
+else
+    echo "Namespace 'argocd' already exists, skipping creation."
+fi
+
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+if ! helm status argocd -n argocd &> /dev/null; then
+    echo "Installing ArgoCD via Helm..."
+    helm upgrade --install argocd argo/argo-cd --version 8.0.0 -n argocd --values argo-values.yaml
+    kubectl rollout status -n argocd deploy/argocd-server
+
+    # TODO: debug password reset
+    echo "Setting default ArgoCD admin password to 'admin123'..." 
+    # Store the password hash in a variable to avoid quoting issues
+    ADMIN_PASSWORD_HASH=$(htpasswd -bnBC 10 "" admin123 | tr -d '\n')
+    kubectl patch secret -n argocd argocd-secret \
+      -p "{\"stringData\": {\"admin.password\": \"$ADMIN_PASSWORD_HASH\"}}"
+    echo "ArgoCD installed on kind cluster with username/password admin/admin123"
+else
+    echo "ArgoCD already installed, skipping installation."
+fi
+
+if ! kubectl get application sample-apps -n argocd &> /dev/null; then
+    echo "Installing ArgoCD application..."
+    kubectl apply -f argo-application.yaml
+else
+    echo "ArgoCD application 'sample-apps' already exists, skipping creation."
+fi
 
 # --- Check for OpenAI API Key ---
 if [ -z "$OPENAI_API_KEY" ]; then
@@ -52,6 +102,21 @@ if [ -z "$OPENAI_API_KEY" ]; then
     exit 1
 else
     echo "OPENAI_API_KEY is set."
+fi
+
+# --- Check for GitHub PAT and Create Secret ---
+if [ -z "$GH_PAT" ]; then
+    echo "Error: GH_PAT environment variable is not set."
+    echo "Please set it before running this script: export GH_PAT='your-github-pat'"
+    exit 1
+else
+    echo "GH_PAT is set."
+    if ! kubectl get secret github-pat-secret -n kagent &> /dev/null; then
+        echo "Creating github-pat-secret..."
+        kubectl create secret generic github-pat-secret --from-literal=GH_PAT="$GH_PAT" -n kagent
+    else
+        echo "Secret 'github-pat-secret' already exists, skipping creation."
+    fi
 fi
 
 # --- Check for kagent installation ---
@@ -64,6 +129,8 @@ else
     echo "kagent CRD found, skipping installation."
 fi
 
-echo "Getting kagent agents..."
-kubectl get agents.kagent.dev -n kagent
+# --- Apply GitHub Toolserver ---
+echo "Applying GitHub toolserver..."
+kubectl apply -f gh-server.yaml
+
 echo "Setup complete!"

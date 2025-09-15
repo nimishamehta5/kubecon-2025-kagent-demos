@@ -1,0 +1,14 @@
+apiVersion: kagent.dev/v1alpha1
+kind: ToolServer
+metadata:
+  name: server-github
+  namespace: kagent
+spec:
+  description: "GitHub toolserver for accessing GitHub repositories and issues"
+  config:
+    stdio:
+      command: npx
+      args:
+      - '@modelcontextprotocol/server-github'
+      env:
+        GITHUB_PERSONAL_ACCESS_TOKEN: "${GH_PAT}"
