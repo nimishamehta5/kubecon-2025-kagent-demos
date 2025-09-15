@@ -79,10 +79,9 @@ if ! helm status argocd -n argocd &> /dev/null; then
 
     # TODO: debug password reset
     echo "Setting default ArgoCD admin password to 'admin123'..." 
-    # Store the password hash in a variable to avoid quoting issues
-    ADMIN_PASSWORD_HASH=$(htpasswd -bnBC 10 "" admin123 | tr -d '\n')
-    kubectl patch secret -n argocd argocd-secret \
-      -p "{\"stringData\": {\"admin.password\": \"$ADMIN_PASSWORD_HASH\"}}"
+    kubectl --context $CONTEXT patch secret -n argocd argocd-secret \
+  -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" admin123 | tr -d ':\n')'"}}'
+
     echo "ArgoCD installed on kind cluster with username/password admin/admin123"
 else
     echo "ArgoCD already installed, skipping installation."
