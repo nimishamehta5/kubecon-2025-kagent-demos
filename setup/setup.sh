@@ -79,7 +79,7 @@ if ! helm status argocd -n argocd &> /dev/null; then
 
     # TODO: debug password reset
     echo "Setting default ArgoCD admin password to 'admin123'..." 
-    kubectl --context $CONTEXT patch secret -n argocd argocd-secret \
+    kubectl patch secret -n argocd argocd-secret \
   -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" admin123 | tr -d ':\n')'"}}'
 
     echo "ArgoCD installed on kind cluster with username/password admin/admin123"
@@ -127,9 +127,5 @@ if ! kubectl get crd agents.kagent.dev &> /dev/null; then
 else
     echo "kagent CRD found, skipping installation."
 fi
-
-# --- Apply GitHub Toolserver ---
-echo "Applying GitHub toolserver..."
-kubectl apply -f gh-server.yaml
 
 echo "Setup complete!"

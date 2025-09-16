@@ -11,4 +11,4 @@ spec:
       args:
       - '@modelcontextprotocol/server-github'
       env:
-        GITHUB_PERSONAL_ACCESS_TOKEN: "${GH_PAT}"
+        GITHUB_PERSONAL_ACCESS_TOKEN: "$GH_PAT"
