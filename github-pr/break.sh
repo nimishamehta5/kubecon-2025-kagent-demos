@@ -29,5 +29,3 @@ git push origin main
 cd - > /dev/null
 rm -rf "$TEMP_DIR"
 echo "Cleanup complete" 
-
-# Restart the frontend-v1 deployment
