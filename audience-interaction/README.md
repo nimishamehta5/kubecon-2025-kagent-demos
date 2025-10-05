@@ -29,16 +29,18 @@ This script will:
 ./startup.sh
 ```
 
-Install kgateway
+Install kgateway to setup a k8s Gateway API ingress gateway:
 ```sh
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
+
 helm upgrade -i --create-namespace --namespace kgateway-system --version v2.1.0-main \
 kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
 
 helm upgrade -i --namespace kgateway-system --version v2.1.0-main kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --set agentgateway.enabled=true --set inferenceExtension.enabled=true
-
 ```
 
-```
+Apply the Gateway and HTTPRoute config to setup the ingress route:
+```sh
 kubectl apply -f kubernetes/
 ```
 
@@ -49,32 +51,28 @@ The following two LLM models are used in the demo:
 - Llama (Large Language Model Meta AI) 3.2
 
 Run ollama locally:
-```
+```sh
 ollama serve
 ```
 
 Pull the two models:
-```
+```sh
 ollama pull llava
 ollama pull llama3.2
 ```
 
 
-## Install Istio ambient and enroll all the apps to Istio ambient
-
-We use [Istio](https://istio.io) to secure, observe and control the traffic among the microservices in the cluster.
-
-```sh
-./install-istio.sh
-```
-
 ## Install kagent
 
+First make sure you have an API key setup:
 ```sh
 export OPENAI_API_KEY="your-api-key-here"
 ```
 
-
+Then install kagent via the CLI tool:
+```sh
+kagent install
+```
 
 ## Access the demo app
 
@@ -93,9 +91,73 @@ route not found
 
 How can we fix this? 
 
-# kagent to the rescue
+# kagent to the rescue!
 
 Chatting with the kubernetes agent, you should be able to get it to patch the HTTPRoute to be in the default ns.
+
+# Multiple agents in action
+
+Next, let's install Istio ambient and enroll all the apps to Istio ambient. We can use [Istio](https://istio.io) to secure, observe and control the traffic among the microservices in the cluster.
+
+```sh
+helm repo add istio https://istio-release.storage.googleapis.com/charts
+helm repo update
+
+# install crds
+helm upgrade --install istio-base istio/base -n istio-system --create-namespace --wait
+
+# install ambient profile
+helm upgrade --install istiod istio/istiod --namespace istio-system --set profile=ambient --wait
+```
+
+Let's apply kiali and prometheus to visualize the traffic and be able to query metrics:
+```sh
+kubectl apply -f  ~/istio-1.25.0/samples/addons/prometheus.yaml
+kubectl apply -f  ~/istio-1.25.0/samples/addons/kiali.yaml
+```
+
+In order to add our app to the mesh, we need to label the namespace:
+```sh
+kubectl label ns default istio.io/dataplane-mode=ambient
+istioctl waypoint apply --enroll-namespace --namespace default --overwrite
+```
+
+Now let's create an and Istio ingress and egress gateway to secure our traffic to the ollama model:
+```sh
+kubectl apply -f policy/ingress-gateway.yaml
+kubectl apply -f policy/istio-http-route.yaml
+kubectl create ns istio-egress
+kubectl label ns istio-egress istio.io/dataplane-mode=ambient
+istioctl waypoint apply --enroll-namespace --namespace istio-egress --overwrite
+kubectl apply -f policy/se-ollama.yaml
+```
+
+```sh
+kubectl port-forward -n istio-system service/ingress-gateway-istio 8001:80
+```
+
+Let's check out the networking graph in Kiali:
+```sh
+istioctl dashboard kiali
+```
+
+It looks like we have a couple errors on our egress gateway `Gateway API Class not found in Kiali configuration` and we have an empty graph! 
+
+Oh no, our Istio setup doesn't seem to be capturing traffic! What did we miss? 
+
+Let's install an multi-agent that can handle debugging both kubernetes and helm:
+```sh
+kubectl apply -f a2a/
+```
+
+Fix the missing istio cni piece:
+```sh
+# install cni 
+helm upgrade --install istio-cni istio/cni -n istio-system --set profile=ambient --wait
+
+# install ztunnel 
+helm install ztunnel istio/ztunnel -n istio-system --wait
+```
 
 ## Cleanup
 
