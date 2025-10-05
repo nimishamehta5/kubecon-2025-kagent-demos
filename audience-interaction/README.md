@@ -159,6 +159,16 @@ helm upgrade --install istio-cni istio/cni -n istio-system --set profile=ambient
 helm install ztunnel istio/ztunnel -n istio-system --wait
 ```
 
+# Simpler kgateway upgrade example 
+
+```
+What version of kgateway am I running? 
+```
+
+```
+Check what helm values I have set for kgateway?
+```
+
 ## Cleanup
 
 To clean up the demo, run the following command:
