@@ -1,6 +1,6 @@
 ### Demo Steps
 
-1. Port-forward argocd server and visit http://localhost:8080.
+1. Port-forward argocd server and visit http://localhost:8080
 ```bash
 kubectl -n default port-forward service/argocd-server -n argocd 8080:443
 ```
@@ -9,7 +9,7 @@ kubectl -n default port-forward service/argocd-server -n argocd 8080:443
 ```bash
 kubectl -n default port-forward svc/frontend 9090:9090
 ```
-Open http://localhost:9090/.
+Open http://localhost:9090/ui/
 
 3. Break the environment.
 ```bash

@@ -497,17 +497,11 @@ spec:
 
     These tools can be used to troubleshoot policy issues, verify policy behavior, and ensure your network policies are correctly configured before deployment.
   tools:
-  - agent:
-      ref: k8s-agent
-    type: Agent
   - builtin:
       name: kagent.tools.k8s.ApplyManifest
     type: Builtin
   - builtin:
       name: kagent.tools.k8s.CreateResource
-    type: Builtin
-  - builtin:
-      name: kagent.tools.k8s.DeleteResource
     type: Builtin
   - builtin:
       name: kagent.tools.k8s.DescribeResource
