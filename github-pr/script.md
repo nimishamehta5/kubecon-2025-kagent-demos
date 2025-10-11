@@ -2,14 +2,14 @@
 
 1. Port-forward argocd server and visit http://localhost:8080.
 ```bash
-kubectl port-forward service/argocd-server -n argocd 8080:443
+kubectl -n default port-forward service/argocd-server -n argocd 8080:443
 ```
 
 2. Port forward the frontend service and view healthy application.
 ```bash
-kubectl port-forward svc/frontend 9090:9090
+kubectl -n default port-forward svc/frontend 9090:9090
 ```
-Open http://localhost:9090/ui/.
+Open http://localhost:9090/.
 
 3. Break the environment.
 ```bash
@@ -22,7 +22,7 @@ Open http://localhost:9090/ui/.
 
 6. Apply the gitops agent.
 ```bash
-kubectl apply -f github-fix-agent.yaml
+kubectl -n kagent apply -f github-fix-agent.yaml
 ```
 
 7. Start kagent dashboard, navigate to gitops agent.
@@ -33,21 +33,30 @@ kagent dashboard
 8. Ask the agent to fix the environment.
 
 Prompts:
-"Calling the frontend service at http://frontend:9090 I see HTTP 500 errors. The apps are running in the default namespace."
+```
+Calling the frontend service at http://frontend:9090 I see HTTP 500 errors reaching the backend. The apps are running in the default namespace.
+```
 
 Follow-up prompt:
-"GH repo name: https://github.com/nimishamehta5/sample-app
+```
+GH repo name: https://github.com/nimishamehta5/sample-app
 Create the branch from main. 
 You can call it "fix-live-demo-branch"
-The services are in the application.yaml file, can you check the GH repo?"
+The services are in the application.yaml file, can you create a PR to fix?
+```
 
 9. Kagent should open a PR in the repo to fix the incorrect config.
 
 ### Curl the frontend service
 ```bash
-kubectl run curl-test --image=curlimages/curl -it --rm -- sh
+kubectl -n default run curl-test --image=curlimages/curl -it --rm -- sh
 curl http://frontend:9090
 ```
+
+10. Merge the PR, sync the application in Argo UI, then show the application as healthy in the UI.
+
+11. (follow-up) Delete the branch "fix-live-demo-branch" in the GitHub repo.
+
 
 ### Argo UI
 

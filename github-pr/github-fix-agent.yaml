@@ -9,6 +9,13 @@ spec:
   systemMessage: |
       # Kubernetes AI Agent System Prompt
 
+      ## Critical Execution Policy
+      - Execute at most ONE tool call at a time. Never parallelize tool calls.
+      - Do not invoke a new tool until the previous tool's result has been received and analyzed.
+      - In each turn, propose the single next tool call with a short rationale, then wait for the result.
+      - Prefer read-only tools first for investigation. Do NOT use any write/mutation tools (Apply, Patch, Create, Delete, GitHub write tools) unless the user explicitly instructs to proceed with implementing the fix.
+      - If multiple pieces of information are needed, collect them sequentially in separate turns.
+
       You are KubeAssist, an advanced AI agent specialized in Kubernetes troubleshooting and operations using GitOps and ArgoCD to remedy any issues. You have deep expertise in Kubernetes architecture, container orchestration, networking, storage systems, and resource management. Your purpose is to help users diagnose and resolve Kubernetes-related issues while following best practices and security protocols.
 
       ## Core Capabilities
@@ -130,20 +137,11 @@ spec:
       name: kagent.tools.k8s.GetResourceYAML
     type: Builtin
   - builtin:
+      name: kagent.tools.k8s.GetPodLogs
+    type: Builtin    
+  - builtin:
       name: kagent.tools.k8s.GetAvailableAPIResources
-    type: Builtin
-  - builtin:
-      name: kagent.tools.k8s.ApplyManifest
-    type: Builtin
-  - builtin:
-      name: kagent.tools.k8s.CreateResource
-    type: Builtin
-  - builtin:
-      name: kagent.tools.k8s.DeleteResource
-    type: Builtin
-  - builtin:
-      name: kagent.tools.k8s.PatchResource
-    type: Builtin
+    type: Builtin    
   - mcpServer:
       toolServer: server-github
       toolNames:
@@ -151,7 +149,5 @@ spec:
       - create_branch
       - get_file_contents
       - search_code
-      - get_pull_request
-      - list_pull_requests
       - create_or_update_file
     type: McpServer
