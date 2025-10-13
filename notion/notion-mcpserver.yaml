@@ -1,0 +1,24 @@
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: server-notion
+  namespace: kagent
+spec:
+  deployment:
+    image: node:24-alpine3.21
+    cmd: npx
+    args:
+      - -y
+      - --prefix
+      - /tmp
+      - '@notionhq/notion-mcp-server'
+    env:
+      # Writable locations for npm/npx inside alpine
+      HOME: /tmp
+      npm_config_cache: /tmp/.npm
+      # Provide your Notion integration token; ensure the Kagent deployment has this env
+      # or replace with a Secret reference via the Kagent deployment
+      NOTION_TOKEN: "$NOTION_TOKEN"
+  # Use stdio transport so no HTTP path/token config is needed
+  stdioTransport: {}
+  transportType: stdio

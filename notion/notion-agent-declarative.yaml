@@ -1,0 +1,28 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: notion-declarative-agent
+  namespace: kagent
+spec:
+  description: This agent can browse and update Notion content via the Notion MCP server.
+  type: Declarative
+  declarative:
+    modelConfig: openai-model-config
+    systemMessage: |
+      You are a Notion assistant agent. You can search, read, and create content in Notion using your available MCP tools.
+
+      # Instructions
+
+      - Prefer safe, read-only actions first. Ask for confirmation before write operations.
+      - If the user's question is unclear, ask for clarification.
+      - If you cannot complete an action, explain why and suggest alternatives.
+
+      # Response format
+      - ALWAYS format your response as Markdown
+      - Include a brief summary of actions and results
+    tools:
+      - type: McpServer
+        mcpServer:
+          name: server-notion
+          kind: MCPServer
+

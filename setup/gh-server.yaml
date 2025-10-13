@@ -11,4 +11,5 @@ spec:
       args:
       - '@modelcontextprotocol/server-github'
       env:
+        # Provide GITHUB_PERSONAL_ACCESS_TOKEN to the Kagent runtime via Secret/env
         GITHUB_PERSONAL_ACCESS_TOKEN: "$GH_PAT"

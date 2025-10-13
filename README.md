@@ -9,3 +9,8 @@
 * [Kagent CLI](https://kagent.dev/docs/kagent/getting-started/quickstart#installing-kagent) installed locally.
 * An [OpenAI API key](https://platform.openai.com/api-keys), set as an environment variable `OPENAI_API_KEY`.
 * A [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token), set as an environment variable `GH_PAT`.
+
+Note: This demo uses Kagent version 0.3.2
+git commit: 056be8c
+build date: 2025-05-08
+backend version: 0.4.2
