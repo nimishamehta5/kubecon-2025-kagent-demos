@@ -3,14 +3,21 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 set -o pipefail
+ 
+ # Cluster name can be overridden via environment; default to "kind"
+ CLUSTER_NAME=${CLUSTER_NAME:-kind}
 
 # --- Check for Kind Cluster ---
-if ! kind get clusters | grep -q "kind"; then
-    echo "Creating kind cluster..."
-    kind create cluster --config kind-config.yaml
-else
-    echo "Kind cluster 'kind' already exists, skipping creation."
-fi
+ # Capture active clusters
+ activeClusters=$(kind get clusters 2>/dev/null || true)
+ 
+ # If the desired kind cluster exists already, skip creation
+ if [[ "$activeClusters" =~ (^|[[:space:]])"$CLUSTER_NAME"($|[[:space:]]) ]]; then
+     echo "Kind cluster '$CLUSTER_NAME' already exists, skipping creation."
+ else
+     echo "Creating kind cluster '$CLUSTER_NAME'..."
+     kind create cluster --name "$CLUSTER_NAME" --config kind-config.yaml
+ fi
 
 # --- Install Cilium ---
 if ! kubectl get pods -n kube-system -l k8s-app=cilium --no-headers | grep -q "cilium"; then
@@ -74,7 +81,7 @@ helm repo update
 
 if ! helm status argocd -n argocd &> /dev/null; then
     echo "Installing ArgoCD via Helm..."
-    helm upgrade --install argocd argo/argo-cd --version 8.0.0 -n argocd --values argo-values.yaml
+    helm upgrade --install argocd argo/argo-cd --version 8.0.0 -n argocd --values argo-values.yaml --wait
     kubectl rollout status -n argocd deploy/argocd-server
 
     # TODO: debug password reset
@@ -103,29 +110,51 @@ else
     echo "OPENAI_API_KEY is set."
 fi
 
-# --- Check for GitHub PAT and Create Secret ---
-if [ -z "$GH_PAT" ]; then
-    echo "Error: GH_PAT environment variable is not set."
-    echo "Please set it before running this script: export GH_PAT='your-github-pat'"
-    exit 1
+# --- Install kagent (CRDs and controller) ---
+if ! kubectl get crd agents.kagent.dev &> /dev/null; then
+    echo "kagent CRDs not found. Installing kagent CRDs via Helm (OCI)..."
+    helm upgrade --install kagent-crds oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
+        --namespace kagent \
+        --create-namespace \
+        --wait
 else
-    echo "GH_PAT is set."
-    if ! kubectl get secret github-pat-secret -n kagent &> /dev/null; then
-        echo "Creating github-pat-secret..."
-        kubectl create secret generic github-pat-secret --from-literal=GH_PAT="$GH_PAT" -n kagent
-    else
-        echo "Secret 'github-pat-secret' already exists, skipping creation."
-    fi
+    echo "kagent CRDs already present. Ensuring they are up to date..."
+    helm upgrade --install kagent-crds oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
+        --namespace kagent \
+        --create-namespace \
+        --wait
 fi
 
-# --- Check for kagent installation ---
-if ! kubectl get crd agents.kagent.dev &> /dev/null; then
-    echo "kagent CRD 'agents.kagent.dev' not found."
-    echo "Please run the interactive 'kagent' CLI and type 'install' to set it up."
-    echo "Then, re-run this script."
+echo "Installing/Upgrading kagent via Helm (OCI)..."
+helm upgrade --install kagent oci://ghcr.io/kagent-dev/kagent/helm/kagent \
+    --namespace kagent \
+    --set providers.default=openAI \
+    --set providers.openAI.apiKey="$OPENAI_API_KEY" \
+    --wait
+
+# --- Check for GitHub token and create Secret ---
+if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
+    echo "Error: GITHUB_PERSONAL_ACCESS_TOKEN environment variable is not set."
+    echo "Please set it before running this script: export GITHUB_PERSONAL_ACCESS_TOKEN='your-github-pat'"
     exit 1
 else
-    echo "kagent CRD found, skipping installation."
+    echo "GITHUB_PERSONAL_ACCESS_TOKEN is set."
+    if ! kubectl get secret github-pat-secret -n kagent &> /dev/null; then
+        echo "Creating github-pat-secret with GITHUB_PERSONAL_ACCESS_TOKEN..."
+        kubectl create secret generic github-pat-secret \
+          --from-literal=GITHUB_PERSONAL_ACCESS_TOKEN="$GITHUB_PERSONAL_ACCESS_TOKEN" \
+          -n kagent
+    else
+        echo "Secret 'github-pat-secret' already exists, ensuring required key is present..."
+        if ! kubectl get secret github-pat-secret -n kagent -o jsonpath='{.data.GITHUB_PERSONAL_ACCESS_TOKEN}' | grep -q .; then
+            echo "Patching secret to add GITHUB_PERSONAL_ACCESS_TOKEN..."
+            kubectl patch secret github-pat-secret -n kagent \
+              --type=merge \
+              -p '{"stringData": {"GITHUB_PERSONAL_ACCESS_TOKEN": "'$GITHUB_PERSONAL_ACCESS_TOKEN'"}}'
+        else
+            echo "Key GITHUB_PERSONAL_ACCESS_TOKEN already present."
+        fi
+    fi
 fi
 
 echo "Setup complete!"

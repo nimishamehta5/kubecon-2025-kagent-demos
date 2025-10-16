@@ -20,17 +20,23 @@ Open http://localhost:9090/ui/
 
 5. Go to Argo UI, sync the application. The frontend will show the application as unhealthy.
 
-6. Apply the gitops agent.
+6. Apply the Github MCP Server yaml.
+```bash
+kubectl -n kagent apply -f gh-server.yaml
+```
+
+7. Apply the gitops agent yaml.
 ```bash
 kubectl -n kagent apply -f github-fix-agent.yaml
 ```
 
-7. Start kagent dashboard, navigate to gitops agent.
+8. Start kagent dashboard, navigate to gitops agent.
 ```
-kagent dashboard
+kubectl -n kagent port-forward service/kagent-ui 8082:8080
 ```
+Open http://localhost:8082
 
-8. Ask the agent to fix the environment.
+9. Ask the agent to fix the environment.
 
 Prompts:
 ```

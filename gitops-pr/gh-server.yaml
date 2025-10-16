@@ -1,0 +1,16 @@
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: gh-server
+  namespace: kagent
+spec:
+  deployment:
+    args:
+    - '@modelcontextprotocol/server-github'
+    cmd: npx
+    secretRefs:
+      - name: github-pat-secret   # created in setup.sh
+    image: node:24-alpine3.21
+    port: 3000
+  stdioTransport: {}
+  transportType: stdio
