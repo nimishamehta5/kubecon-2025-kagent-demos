@@ -1,0 +1,28 @@
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: mcp-rbac
+spec:
+  targetRefs:
+  - group: gateway.kgateway.dev
+    kind: Backend
+    name: github-mcp-backend
+  rbac:
+    policy:
+      matchExpressions:
+        - "jwt.email == 'nina@dev.com'"
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: github-mcp-backend
+  namespace: kgateway-system
+spec:
+  type: MCP
+  mcp:
+    targets:
+    - name: mcp-target
+      static:
+        host: api.githubcopilot.com
+        port: 443
+        path: /mcp/

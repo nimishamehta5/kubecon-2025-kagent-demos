@@ -1,0 +1,24 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: gh-agent
+  namespace: kagent
+spec:
+  declarative:
+    modelConfig: default-model-config
+    stream: true
+    systemMessage: |-
+      You are a helpful assistant that can do anything.
+      You can use the gh-server tool to interact with GitHub to find issues and pull requests.
+    tools:
+    - mcpServer:
+        apiGroup: kagent.dev
+        kind: MCPServer
+        name: gh-server
+        toolNames:
+        - list_pull_requests
+        - get_pull_request
+      type: McpServer
+  description: This agent can do stuff with GitHub.
+  type: Declarative
+

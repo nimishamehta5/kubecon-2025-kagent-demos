@@ -29,16 +29,8 @@ This script will:
 ./startup.sh
 ```
 
-Install kgateway
+Apply the Gateway and HTTPRoute config to setup the ingress route:
 ```sh
-helm upgrade -i --create-namespace --namespace kgateway-system --version v2.1.0-main \
-kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
-
-helm upgrade -i --namespace kgateway-system --version v2.1.0-main kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway --set agentgateway.enabled=true --set inferenceExtension.enabled=true
-
-```
-
-```
 kubectl apply -f kubernetes/
 ```
 
@@ -49,32 +41,15 @@ The following two LLM models are used in the demo:
 - Llama (Large Language Model Meta AI) 3.2
 
 Run ollama locally:
-```
+```sh
 ollama serve
 ```
 
 Pull the two models:
-```
+```sh
 ollama pull llava
 ollama pull llama3.2
 ```
-
-
-## Install Istio ambient and enroll all the apps to Istio ambient
-
-We use [Istio](https://istio.io) to secure, observe and control the traffic among the microservices in the cluster.
-
-```sh
-./install-istio.sh
-```
-
-## Install kagent
-
-```sh
-export OPENAI_API_KEY="your-api-key-here"
-```
-
-
 
 ## Access the demo app
 
@@ -93,9 +68,35 @@ route not found
 
 How can we fix this? 
 
-# kagent to the rescue
+# kagent to the rescue!
 
 Chatting with the kubernetes agent, you should be able to get it to patch the HTTPRoute to be in the default ns.
+
+In a new terminal tab, start kagent dashboard.
+```sh
+kubectl -n kagent port-forward service/kagent-ui 8082:8080
+```
+
+# Multiple agents in action
+
+Next, let's apply the nested agent to the cluster:
+```sh
+kubectl apply -f a2a/
+```
+
+Ask the nested agent to help you:
+
+```
+What version of kgateway am I running? 
+```
+
+```
+Check what helm values I have set for kgateway that are related to agentgateway?
+```
+
+```
+What PRs are open in kgateway-dev/kgateway that are related to agentgateway?
+```
 
 ## Cleanup
 
