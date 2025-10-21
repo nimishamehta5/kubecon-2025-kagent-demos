@@ -28,8 +28,8 @@ spec:
         kind: MCPServer
         name: gh-server
         toolNames:
-        - issues
-        - pull_requests
+        - list_pull_requests
+        - get_pull_request
       type: McpServer
   description: This agent can do anything.
   type: Declarative
