@@ -27,7 +27,7 @@ kubectl -n kagent apply -f gh-server.yaml
 
 7. Apply the gitops agent yaml.
 ```bash
-kubectl -n kagent apply -f github-fix-agent.yaml
+kubectl -n kagent apply -f gitops-agent.yaml
 ```
 
 8. Start kagent dashboard, navigate to gitops agent.
