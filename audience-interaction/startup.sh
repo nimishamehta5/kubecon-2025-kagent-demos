@@ -12,7 +12,7 @@
      echo "Kind cluster '$CLUSTER_NAME' already exists, skipping creation."
  else
      echo "Creating kind cluster '$CLUSTER_NAME'..."
-     kind create cluster --name "$CLUSTER_NAME" --config kind-config.yaml
+     kind create cluster --name "$CLUSTER_NAME"
  fi
 
 # --- Apply demo app ---

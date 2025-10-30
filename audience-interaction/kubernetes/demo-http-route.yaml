@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-  - name: agentgateway
+  - name: ingress-gateway
     namespace: kgateway-system
   rules:
   - matches:
