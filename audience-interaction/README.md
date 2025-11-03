@@ -56,7 +56,7 @@ ollama pull llama3.2
 Use port-forwarding to help us access the demo app:
 
 ```sh
-kubectl port-forward svc/agentgateway 8001:80
+kubectl port-forward svc/ingress-gateway 8001:80
 ```
 
 To access the demo app, open your browser and navigate to [http://localhost:8001](http://localhost:8001)
@@ -75,6 +75,11 @@ Chatting with the kubernetes agent, you should be able to get it to patch the HT
 In a new terminal tab, start kagent dashboard.
 ```sh
 kubectl -n kagent port-forward service/kagent-ui 8082:8080
+```
+
+Sample question:
+```
+When I port-forward my "ingress-gateway" in the default namespace, I get a "route not found" error, even though it’s linked to my demo-http-route. How can I fix this?
 ```
 
 # Multiple agents in action
