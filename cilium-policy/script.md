@@ -21,7 +21,7 @@ kubectl -n default apply -f broken-policy.yaml
 
 CLI: 
 ```bash
-kubectl -n default apply -f cilium-policy-agent.yaml
+kubectl apply -f cilium-policy-agent.yaml
 ```
 
 UI:

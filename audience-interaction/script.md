@@ -1,4 +1,4 @@
-# Debugging Demo
+### Demo Steps
 
 Our live demo has hit a snag, can kagent save the day?
 
@@ -7,7 +7,7 @@ Let's use kagent to debug our cluster and get the demo working!
 
 # Setup 
 
-The Gen AI Demo uses Kubernetes, Istio Ambient, Prometheus, Kiali
+The Gen AI Demo uses Kubernetes, kgateway and helm 
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ kubectl apply -f a2a/
 Ask the nested agent to help you:
 
 ```
-What version of kgateway am I running? 
+What is the image version of the kgateway controller in the kgateway-system ns?
 ```
 
 ```
