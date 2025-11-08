@@ -5,6 +5,21 @@
 kubectl -n default port-forward service/argocd-server -n argocd 8080:443
 ```
 
+Username: admin
+Password: admin123
+NOTE: needed to restart argo and generate hash?
+```
+# Generate only the hash
+PASSWORD_HASH=$(htpasswd -nbB admin admin123 | cut -d ":" -f2)
+
+# Patch the secret
+kubectl -n argocd patch secret argocd-secret -p '{"stringData": {"admin.password": "'"$PASSWORD_HASH"'"}}'
+
+# Restart the server so ArgoCD picks it up
+kubectl -n argocd rollout restart deploy argocd-server
+
+```
+
 2. Port forward the frontend service and view healthy application.
 ```bash
 kubectl -n default port-forward svc/frontend 9090:9090
@@ -16,7 +31,7 @@ Open http://localhost:9090/ui/
 ./break.sh
 ```
 
-4. The sample-app repo should now show the broken commit: https://github.com/nimishamehta5/sample-app
+4. The sample-app repo should now show the broken commit: https://github.com/npolshakova/sample-app
 
 5. Go to Argo UI, sync the application. The frontend will show the application as unhealthy.
 
@@ -45,7 +60,7 @@ Calling the frontend service at http://frontend:9090 I see HTTP 500 errors reach
 
 Follow-up prompt:
 ```
-GH repo name: https://github.com/nimishamehta5/sample-app
+GH repo name: https://github.com/npolshakova/sample-app
 Create the branch from main. 
 You can call it "fix-live-demo-branch"
 The services are in the application.yaml file, can you create a PR to fix?

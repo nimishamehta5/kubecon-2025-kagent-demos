@@ -92,7 +92,7 @@ kubectl apply -f a2a/
 Ask the nested agent to help you:
 
 ```
-What version of kgateway am I running? 
+What is the image version of the kgateway controller in the kgateway-system ns?
 ```
 
 ```

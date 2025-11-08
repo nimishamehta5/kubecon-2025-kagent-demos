@@ -5,7 +5,7 @@ TEMP_DIR=$(mktemp -d)
 echo "Created temporary directory: $TEMP_DIR"
 
 # Clone the repository
-git clone git@github.com:nimishamehta5/sample-app.git "$TEMP_DIR"
+git clone git@github.com:npolshakova/sample-app.git "$TEMP_DIR"
 cd "$TEMP_DIR"
 
 # Configure git user (required for commits)

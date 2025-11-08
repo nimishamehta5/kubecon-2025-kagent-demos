@@ -116,13 +116,13 @@ if ! kubectl get crd agents.kagent.dev &> /dev/null; then
     helm upgrade --install kagent-crds oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
         --namespace kagent \
         --create-namespace \
-        --wait
+        # --wait
 else
     echo "kagent CRDs already present. Ensuring they are up to date..."
     helm upgrade --install kagent-crds oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
         --namespace kagent \
         --create-namespace \
-        --wait
+        # --wait
 fi
 
 echo "Installing/Upgrading kagent via Helm (OCI)..."
@@ -130,7 +130,7 @@ helm upgrade --install kagent oci://ghcr.io/kagent-dev/kagent/helm/kagent \
     --namespace kagent \
     --set providers.default=openAI \
     --set providers.openAI.apiKey="$OPENAI_API_KEY" \
-    --wait
+    # --wait
 
 # --- Check for GitHub token and create Secret ---
 if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
