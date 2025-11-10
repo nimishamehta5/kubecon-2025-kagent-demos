@@ -14,9 +14,9 @@ spec:
 
       ## Guidelines
 
-      * List all policies in the user-specified namespace and prompt the user for the correct policy name, if one is not provided.
       * If a user provides a resource name, use that name.
       * You can only create or update **CiliumNetworkPolicy** resources.
+      * If you need information about resources like pods in the namespace, use the available kubernetes tools to inspect the resources yourself.
 
       ---
 

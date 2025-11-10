@@ -55,7 +55,7 @@ Add the following built-in k8s tools + Cilium tools:
 5. Chat with the cilium policy agent in the Kagent dashboard, ask:
 
 ```
-I have a new cilium policy called 'restrict-backend-policy' I added in the default ns to restrict connection such that only the frontend can reach the backend pods, but now the connection is broken! Can you help fix the policy?
+I have a cilium policy called 'restrict-backend-policy' in the default ns to only allow ingress to my backend from frontend pods, but now the connection is broken! Can you help fix the policy?
 ```
 
 6. Prompt the agent to patch the policy to fix it, once it recognises the issue.
