@@ -1,13 +1,14 @@
-# Debugging Demo
+### Demo Steps
 
 Our live demo has hit a snag, can kagent save the day?
 
 This demo is based on Lin Sun's [gen-ai-demo](https://github.com/linsun/gen-ai-demo), but some of the config is not correct.
+
 Let's use kagent to debug our cluster and get the demo working!
 
 # Setup 
 
-The Gen AI Demo uses Kubernetes, Istio Ambient, Prometheus, Kiali
+The Gen AI Demo uses Kubernetes, kgateway and helm.
 
 ## Prerequisites
 
@@ -22,19 +23,21 @@ We have crafted a few scripts to make this demo run as quickly as possible on yo
 This script will:
 
 - Create a kind cluster
-- Install a simple curl client, an [ollama](https://ollama.com/) service and the demo service.
-  - Ollama is a Language Model as a Service (LMaaS) that provides a RESTful API for interacting with large language models. It's a great way to get started with LLMs without having to worry about the infrastructure.
+- The demo service
+- [kgateway](https://github.com/kgateway-dev/kgateway) as a k8s Gateway API ingress gateway controller 
 
 ```sh
 ./startup.sh
 ```
 
-Apply the Gateway and HTTPRoute config to setup the ingress route:
+Apply the Gateway and HTTPRoute config to setup the ingress route to expose the demo app through the ingress gateway:
 ```sh
 kubectl apply -f kubernetes/
 ```
 
 ## Pull the LLM models
+
+The demo app relies on a local Ollama model running locally.
 
 The following two LLM models are used in the demo:
 - LLaVa (Large Language and Vision Assistant)
@@ -77,10 +80,32 @@ In a new terminal tab, start kagent dashboard.
 kubectl -n kagent port-forward service/kagent-ui 8082:8080
 ```
 
+Then open http://localhost:8082 in your browser to view the kagent dashboard.
+
+Next, we'll create an agent through the UI to help us debug the demo. Select "Create" and enter the following:
+- Agent Name: demo-agent
+- Agent Namespace: kagent
+- Agent Type: Declarative
+- Description: kagent to the rescue!
+- System Prompt: (keep the default)
+- Model: gpt-4.1-mini (default kagent model)
+- Tools: (various tools, make sure you have get and apply)
+  - k8s:
+    - k8s_apply_manifest
+    - k8s_create_resource
+    - k8s_describe_resource
+    - k8s_get_resource_yaml
+    - k8s_get_resources
+    - k8s_get_available_api_resources
+
+Once the agent is ready, chat with the agent in the UI.
+
 Sample question:
 ```
-When I port-forward my "ingress-gateway" in the default namespace, I get a "route not found" error, even though it’s linked to my demo-http-route. How can I fix this?
+When I port-forward my "ingress-gateway" in the default namespace, I get a "route not found" error, even though it’s linked to my demo-http-route HTTPRoute resource. How can I fix this?
 ```
+
+Go back and check that the demo app routing is fixed!
 
 # Multiple agents in action
 
@@ -92,7 +117,7 @@ kubectl apply -f a2a/
 Ask the nested agent to help you:
 
 ```
-What version of kgateway am I running? 
+What is the image version of the kgateway controller in the kgateway-system ns?
 ```
 
 ```
