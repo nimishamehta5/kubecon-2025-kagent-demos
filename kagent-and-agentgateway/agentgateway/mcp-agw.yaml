@@ -1,7 +1,7 @@
 apiVersion: kagent.dev/v1alpha2
 kind: RemoteMCPServer
 metadata:
-  name: kagent-tool-server
+  name: kgateway-tool-server
   namespace: kagent
 spec:
   description: Official KAgent tool server

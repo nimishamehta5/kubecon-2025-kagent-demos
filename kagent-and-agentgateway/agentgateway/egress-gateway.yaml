@@ -3,7 +3,7 @@ apiVersion: gateway.networking.k8s.io/v1
 metadata:
   name: egress-gateway
   labels:
-    app: egress-kgateway
+    app: egress-gateway
 spec:
   gatewayClassName: agentgateway
   listeners:
