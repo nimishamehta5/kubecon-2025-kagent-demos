@@ -5,7 +5,7 @@ metadata:
 spec:
   mcp:
     targets:
-    - name: mcp-target
+    - name: mcp-fetch
       static:
         host: mcp-website-fetcher.default.svc.cluster.local
         port: 80
@@ -18,20 +18,8 @@ spec:
                 matchExpressions:
                   # Only allow MCP calls to tools/call for resource 'fetch' on type 'tool' to show policy blocking
                   - "mcp.tool.name == 'fetch'"
----
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: AgentgatewayPolicy
-metadata:
-  name: mcp-ratelimit
-spec:
-  targetRefs:
-  - group: gateway.networking.k8s.io
-    kind: HTTPRoute
-    name: mcp-route
-  traffic:
-      rateLimit:
-        local:
-          - requests: 1
-            unit: Hours
-            burst: 1
-# kubectl logs deployment/mcp-gateway -n default | grep "http.status=429"
+    - name: mcp-server-everything
+      selector:
+        services:
+          matchLabels:
+            app: mcp-server-everything

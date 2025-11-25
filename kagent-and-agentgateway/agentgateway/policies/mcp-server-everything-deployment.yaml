@@ -1,16 +1,3 @@
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: mcp-backend
-spec:
-  mcp:
-    targets:
-      - name: mcp-server-everything
-        selector:
-          services:
-            matchLabels:
-              app: mcp-server-everything
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

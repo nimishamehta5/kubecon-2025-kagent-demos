@@ -1,32 +1,26 @@
 apiVersion: kagent.dev/v1alpha2
 kind: Agent
 metadata:
-  name: fetch-stuff
+  name: mcp-stuff
   namespace: kagent
 spec:
   declarative:
     modelConfig: default-model-config
     stream: true
     systemMessage: |-
-      You're a helpful agent, made by the kagent team.
-
-      # Instructions
-          - If user question is unclear, ask for clarification before running any tools
-          - Always be helpful and friendly
-          - If you don't know how to answer the question DO NOT make things up, tell the user "Sorry, I don't know how to answer that" and ask them to clarify the question further
-          - If you are unable to help, or something goes wrong, refer the user to https://kagent.dev for more information or support.
-
-      # Response format:
-          - ALWAYS format your response as Markdown
-          - Your response will include a summary of actions you took and an explanation of the result
-          - If you created any artifacts such as files or resources, you will include those in your response as well
+      You are a helpful assistant that can fetch, echo, and add.
+      You can use the mcp-fetch_fetch tool to get data from websites.
+      You can use the mcp-server-everything-3001_echo tool to echo back the input.
+      You can use the mcp-server-everything-3001_add tool to add two numbers.
     tools:
     - mcpServer:
         apiGroup: kagent.dev
         kind: RemoteMCPServer
         name: kagent-tool-server
         toolNames:
-        - fetch
+        - mcp-fetch_fetch
+        - mcp-server-everything-3001_add
+        - mcp-server-everything-3001_echo
       type: McpServer
-  description: This agent can do stuff with the fetch tool.
+  description: This agent can do stuff with the mcp tools.
   type: Declarative
