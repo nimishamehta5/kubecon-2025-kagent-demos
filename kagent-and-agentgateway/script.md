@@ -69,19 +69,19 @@ What PRs are open in kgateway-dev/kgateway that are related to agentgateway?
 
 ### Agentgateway Egress 
 
-Test a request to generate some fake emails: 
-```
-Give me some sample email addresses for a programmer named Nina
-```
-
-Oh no! Our agent shouldn't be allowed to do that! Let's configure our ModelConfig to use agentgateway as an egress gateway and apply the policy to protect our egress traffic to the LLM.
-
 Apply the egress gateway config:
 ```shell
 kubectl apply -f agentgateway/egress-gateway.yaml
 ```
 
 Let's edit out agent to use the new ModelConfig that goes through our egress gateway. 
+
+Test a request to generate some fake emails: 
+```
+Give me some sample email addresses for a programmer named Nina
+```
+
+Oh no! Our agent shouldn't be allowed to do that! Let's configure our ModelConfig to use agentgateway as an egress gateway and apply the policy to protect our egress traffic to the LLM.
 
 Now let's apply policy to protect our egress traffic to the LLM:
 
@@ -107,7 +107,9 @@ kubectl apply -f agentgateway/policies/ratelimit-egress.yaml
 ```
 Send several requests through the chat, you should see the ratelimit is hit with a 429 error. 
 
-3. Policy on MCP Servers 
+### Agentgateway MCP 
+
+1. Federate MCP Servers 
 
 Next, let's apply some policies targeting the MCP tools kagent can call. First let's apply a new MCP server and agentgateway Gateway: 
 
@@ -120,6 +122,8 @@ Create an agent that can use the fetch tool either through the UI or by applying
 kubectl apply -f agentgateway/policies/mcp-agent.yaml
 kubectl apply -f agentgateway/policies/mcp-backend.yaml
 ```
+
+2. Authz Policy on MCP Tool Calls
 
 Now let's apply an authorization policy to restrict MCP calls from our agent based on the SA:
 ```shell
