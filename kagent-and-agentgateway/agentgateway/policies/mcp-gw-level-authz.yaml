@@ -1,0 +1,17 @@
+# kubectl logs deployment/mcp-gateway -n default -f | grep "authorization failed"
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-authz
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: mcp-gateway
+  traffic:
+    authorization:
+      action: Deny
+      policy:
+        matchExpressions:
+          # Deny MCP calls from the mcp-agent
+          - "source.identity.namespace == 'kagent' && source.identity.serviceAccount == 'mcp-stuff'"

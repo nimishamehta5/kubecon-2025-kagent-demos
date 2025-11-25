@@ -1,0 +1,26 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: mcp-stuff
+  namespace: kagent
+spec:
+  declarative:
+    modelConfig: default-model-config
+    stream: true
+    systemMessage: |-
+      You are a helpful assistant that can fetch, echo, and add.
+      You can use the mcp-fetch_fetch tool to get data from websites.
+      You can use the mcp-server-everything-3001_echo tool to echo back the input.
+      You can use the mcp-server-everything-3001_add tool to add two numbers.
+    tools:
+    - mcpServer:
+        apiGroup: kagent.dev
+        kind: RemoteMCPServer
+        name: kagent-tool-server
+        toolNames:
+        - mcp-fetch_fetch
+        - mcp-server-everything-3001_add
+        - mcp-server-everything-3001_echo
+      type: McpServer
+  description: This agent can do stuff with the mcp tools.
+  type: Declarative

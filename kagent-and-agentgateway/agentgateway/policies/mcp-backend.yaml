@@ -1,0 +1,25 @@
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: mcp-backend
+spec:
+  mcp:
+    targets:
+    - name: mcp-fetch
+      static:
+        host: mcp-website-fetcher.default.svc.cluster.local
+        port: 80
+        protocol: SSE
+        policies:
+          mcp:
+            authorization:
+              action: Allow
+              policy:
+                matchExpressions:
+                  # Only allow MCP calls to tools/call for resource 'fetch' on type 'tool' to show policy blocking
+                  - "mcp.tool.name == 'fetch'"
+    - name: mcp-server-everything
+      selector:
+        services:
+          matchLabels:
+            app: mcp-server-everything
